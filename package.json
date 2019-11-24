@@ -1,0 +1,23 @@
+{
+  "name": "ccvgudg08",
+  "version": "1.0.0",
+  "description": "ElectronJS",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^7.1.2"
+  },
+  "scripts": {
+    "start": "electron src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MatchaFierce/ccvgUDG08.git"
+  },
+  "author": "MatchaFierce <cesarvaldez.work@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MatchaFierce/ccvgUDG08/issues"
+  },
+  "homepage": "https://github.com/MatchaFierce/ccvgUDG08#readme"
+}
