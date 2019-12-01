@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 
 const url = require('url');
 const path = require('path');
@@ -13,7 +13,11 @@ let mainWindow;
 let newProduct;
 
 app.on('ready', () => {
-    mainWindow = new BrowserWindow({});
+    mainWindow = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'views/index.html'),
         protocol: 'file',
@@ -32,9 +36,12 @@ function createNewProductWindow() {
     newProductWindow = new BrowserWindow({
         width: 400,
         height: 330,
-        title: 'Add a New Product'
+        title: 'Add a New Product',
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
-    newProductWindow.setMenu(null);
+    //newProductWindow.setMenu(null);
     newProductWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'views/new-product.html'),
         protocol: 'file',
@@ -45,17 +52,59 @@ function createNewProductWindow() {
     });
 }
 
+ipcMain.on('product:new', (e, newProduct) => {
+    mainWindow.webContents.send('product:new', newProduct);
+    newProductWindow.close();
+});
+
 const templateMenu = [
     {
         label: 'File',
         submenu: [
             {
                 label: 'New Product',
-                accelerator: 'Ctrl+N',
+                accelerator: process.platform == 'darwin' ? 'command+N' : 'Ctrl+N',
                 click() {
                     createNewProductWindow();
                 }
             }
         ]
+    },
+    {
+        label: 'Remove All Products',
+        click() {
+
+        }
+    },
+    {
+        label: 'Exit',
+        accelerator: process.platform == 'darwin' ? 'command+Q' : 'Ctrl+Q',
+        click() {
+            app.quit();
+        }
     }
 ];
+
+if (process.platform === 'darwin') {
+    templateMenu.unshift({
+        label: app.getName()
+    })
+}
+
+if (process.env.NODE_ENV !== 'production') {
+    templateMenu.push({
+        label: 'DevTools',
+        submenu: [
+            {
+                label:'Show/Hide Dev Tools',
+                accelerator: process.platform == 'darwin' ? 'command+D' : 'Ctrl+D',
+                click(item, focusedWindow) {
+                    focusedWindow.toggleDevTools();
+                }
+            },
+            {
+                role: 'reload'
+            }
+        ]
+    })
+}
