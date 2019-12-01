@@ -3,14 +3,14 @@ const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const url = require('url');
 const path = require('path');
 
+let mainWindow;
+let newProductWindow;
+
 if (process.env.NODE_ENV !== 'production') {
     require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '../node_modules', '.bin', 'electron')
     });
 }
-
-let mainWindow;
-let newProduct;
 
 app.on('ready', () => {
     mainWindow = new BrowserWindow({
@@ -41,12 +41,15 @@ function createNewProductWindow() {
             nodeIntegration: true
         }
     });
-    //newProductWindow.setMenu(null);
+
+    newProductWindow.setMenu(null);
+
     newProductWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'views/new-product.html'),
         protocol: 'file',
         slashes: true
     }));
+    
     newProductWindow.on('closed', () => {
         newProductWindow = null;
     });
@@ -67,21 +70,21 @@ const templateMenu = [
                 click() {
                     createNewProductWindow();
                 }
+            },
+            {
+                label: 'Remove All Products',
+                click() {
+                    mainWindow.webContents.send('products:remove-all');
+                }
+            },
+            {
+                label: 'Exit',
+                accelerator: process.platform == 'darwin' ? 'command+Q' : 'Ctrl+Q',
+                click() {
+                    app.quit();
+                }
             }
         ]
-    },
-    {
-        label: 'Remove All Products',
-        click() {
-
-        }
-    },
-    {
-        label: 'Exit',
-        accelerator: process.platform == 'darwin' ? 'command+Q' : 'Ctrl+Q',
-        click() {
-            app.quit();
-        }
     }
 ];
 
@@ -96,7 +99,7 @@ if (process.env.NODE_ENV !== 'production') {
         label: 'DevTools',
         submenu: [
             {
-                label:'Show/Hide Dev Tools',
+                label: 'Show/Hide Dev Tools',
                 accelerator: process.platform == 'darwin' ? 'command+D' : 'Ctrl+D',
                 click(item, focusedWindow) {
                     focusedWindow.toggleDevTools();
